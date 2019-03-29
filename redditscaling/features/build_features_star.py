@@ -89,7 +89,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args_dict = vars(args)
 
-    df_comments = clean_data(args_dict['comments_folder'])
+    df_comments = clean_data(
+        args_dict['comments_folder'], args_dict['comments_per_subreddit'])
     df_tokenized = tokenize_data(
         df_comments, args_dict['ignore_stopwords'], args_dict['keepcaps'],
         args_dict['decontract'], args_dict['remove_punct'])
