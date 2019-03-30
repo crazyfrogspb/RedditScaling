@@ -96,5 +96,6 @@ if __name__ == "__main__":
     df_tokenized = tokenize_data(
         df_comments, args_dict['ignore_stopwords'], args_dict['keepcaps'],
         args_dict['decontract'], args_dict['remove_punct'])
-    df_tokenized['subreddit'] = '__label__' + df_tokenized['subreddit']
+    df_tokenized['body'] = '__label__' + \
+        df_tokenized['subreddit'] + ' ' + df_tokenized['body']
     df_tokenized['body'].to_csv(args_dict['output_file'], index=False)
