@@ -69,6 +69,7 @@ if __name__ == "__main__":
 
     parser.add_argument('comments_folder', type=str)
     parser.add_argument('output_file', type=str)
+    parser.add_argument('output_file_final', type=str)
 
     parser.add_argument('--comments_per_subreddit', type=int, default=1000)
 
@@ -93,9 +94,12 @@ if __name__ == "__main__":
 
     df_comments = clean_data(
         args_dict['comments_folder'], args_dict['comments_per_subreddit'])
+    clean = '__label__' + \
+        df_comments['subreddit'] + ' ' + df_comments['body']
+    clean['body'].to_csv(args_dict['output_file'], index=False)
     df_tokenized = tokenize_data(
         df_comments, args_dict['ignore_stopwords'], args_dict['keepcaps'],
         args_dict['decontract'], args_dict['remove_punct'])
     df_tokenized['body'] = '__label__' + \
         df_tokenized['subreddit'] + ' ' + df_tokenized['body']
-    df_tokenized['body'].to_csv(args_dict['output_file'], index=False)
+    df_tokenized['body'].to_csv(args_dict['output_file_final'], index=False)
