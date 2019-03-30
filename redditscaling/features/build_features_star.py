@@ -96,8 +96,8 @@ if __name__ == "__main__":
     df_tokenized = tokenize_data(
         df_comments, args_dict['ignore_stopwords'], args_dict['keepcaps'],
         args_dict['decontract'], args_dict['remove_punct'])
-    df_tokenized['body'] = df_tokenized.groupby(
-        'subreddit')['body'].apply(lambda x: '\t'.join(x))
+    df_tokenized = df_tokenized.groupby(
+        'subreddit')['body'].apply(lambda x: '\t'.join(x)).reset_index()
     df_tokenized['body'] = '/r/' + \
-        df_tokenized['subreddit'] + '\t' + df_tokenized['body']
+        df_tokenized['subreddit'] + r'\t' + df_tokenized['body']
     df_tokenized['body'].to_csv(args_dict['output_file'], index=False)

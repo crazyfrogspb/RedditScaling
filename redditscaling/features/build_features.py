@@ -7,7 +7,7 @@ from redditscore.tokenizer import CrazyTokenizer
 from tqdm import tqdm
 
 
-def clean_data(comments_folder, comments_per_subreddit):
+def clean_data(comments_folder, min_comments):
     csv_files = glob.glob(osp.join(comments_folder, '*.csv'))
     df_comments = pd.concat((pd.read_csv(csv_file, lineterminator='\n', usecols=[
         'id', 'body', 'subreddit', 'created_utc']) for csv_file in csv_files))
@@ -28,12 +28,11 @@ def clean_data(comments_folder, comments_per_subreddit):
     df_comments = df_comments.loc[df_comments.body.str.len() > 0]
 
     df_comments = df_comments.groupby('subreddit').filter(
-        lambda x: len(x) >= comments_per_subreddit)
+        lambda x: len(x) >= min_comments)
     if df_comments.empty:
         raise ValueError(
-            f'There are no subreddits with at least {comments_per_subreddit} comments')
+            f'There are no subreddits with at least {min_comments} comments')
     df_comments = df_comments.sample(frac=1.0, random_state=24)
-    df_comments = df_comments.groupby('subreddit').head(comments_per_subreddit)
 
     return df_comments
 
@@ -72,19 +71,15 @@ if __name__ == "__main__":
 
     parser.add_argument('--ignore_stopwords',
                         dest='ignore_stopwords', action='store_true')
-    parser.set_defaults(ignore_stopwords=False)
 
     parser.add_argument('--keepcaps',
                         dest='keepcaps', action='store_true')
-    parser.set_defaults(keepcaps=False)
 
     parser.add_argument('--decontract',
                         dest='decontract', action='store_true')
-    parser.set_defaults(decontract=False)
 
     parser.add_argument('--remove_punct',
                         dest='remove_punct', action='store_true')
-    parser.set_defaults(remove_punct=False)
 
     args = parser.parse_args()
     args_dict = vars(args)
