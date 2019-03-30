@@ -53,11 +53,13 @@ def tokenize_data(df_comments, ignore_stopwords=True, keepcaps=False, decontract
         decontract=decontract,
         remove_punct=remove_punct)
 
+    tokenized = []
     for i in tqdm(range(df_comments.shape[0])):
         current_tokens = tokenizer.tokenize(
             df_comments.iloc[i, df_comments.columns.get_loc('body')])
-        df_comments.iloc[i, df_comments.columns.get_loc(
-            'body')] = ' '.join(current_tokens)
+        tokenized.append(' '.join(current_tokens))
+
+    df_comments['body'] = tokenized
 
     return df_comments
 
