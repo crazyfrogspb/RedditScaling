@@ -25,7 +25,7 @@ class Graph:
     def addEdge(self, u, v):
         self.graph[u].append(v)
 
-    def BFS(self, s, limit=10000):
+    def BFS(self, s, limit=5000):
         visited = {}
         subreddits = []
         for key in self.graph:
@@ -73,7 +73,7 @@ def collect_data(save_path, start_month, end_month, subreddit_number):
                      PROJECT_ID,
                      PRIVATE_KEY,
                      subreddits=subreddits,
-                     comments_per_month=100,
+                     comments_per_month=1000,
                      top_scores=True,
                      csv_directory=osp.join(config.data_dir, 'raw',
                                             'reddit_comments_new'),
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     parser.add_argument('save_path', type=str)
     parser.add_argument('start_month', type=str)
     parser.add_argument('end_month', type=str)
-    parser.add_argument('--subreddit_number', type=int, default=10000)
+    parser.add_argument('--subreddit_number', type=int, default=5000)
 
     args = parser.parse_args()
     args_dict = vars(args)

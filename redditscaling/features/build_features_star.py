@@ -3,8 +3,10 @@ import glob
 import os.path as osp
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
+from redditscaling.config import config
 from redditscore.tokenizer import CrazyTokenizer
 
 
@@ -68,38 +70,42 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tokenize Reddit data')
 
     parser.add_argument('comments_folder', type=str)
-    parser.add_argument('output_file', type=str)
-    parser.add_argument('output_file_final', type=str)
+    parser.add_argument('output_file_name', type=str)
 
     parser.add_argument('--comments_per_subreddit', type=int, default=1000)
 
     parser.add_argument('--ignore_stopwords',
                         dest='ignore_stopwords', action='store_true')
-    parser.set_defaults(ignore_stopwords=False)
-
     parser.add_argument('--keepcaps',
                         dest='keepcaps', action='store_true')
-    parser.set_defaults(keepcaps=False)
-
     parser.add_argument('--decontract',
                         dest='decontract', action='store_true')
-    parser.set_defaults(decontract=False)
-
     parser.add_argument('--remove_punct',
                         dest='remove_punct', action='store_true')
-    parser.set_defaults(remove_punct=False)
+
+    parser.add_argument('--test_size', type=float, default=0.1)
+    parser.add_argument('--val_size', type=float, default=0.1)
+    parser.add_argument('--random_state', type=int, default=24)
 
     args = parser.parse_args()
     args_dict = vars(args)
 
-    df_comments = clean_data(
-        args_dict['comments_folder'], args_dict['comments_per_subreddit'])
+    df_comments = clean_data(args.comments_folder, args.comments_per_subreddit)
     clean = '__label__' + \
         df_comments['subreddit'] + ' ' + df_comments['body']
-    clean.to_csv(args_dict['output_file'], index=False)
     df_tokenized = tokenize_data(
-        df_comments, args_dict['ignore_stopwords'], args_dict['keepcaps'],
-        args_dict['decontract'], args_dict['remove_punct'])
-    df_tokenized['body'] = '__label__' + \
+        df_comments, args.ignore_stopwords, args.keepcaps, args.decontract, args.remove_punct)
+    df_tokenized = '__label__' + \
         df_tokenized['subreddit'] + ' ' + df_tokenized['body']
-    df_tokenized['body'].to_csv(args_dict['output_file_final'], index=False)
+
+    train, test = train_test_split(
+        df_tokenized, test_size=args.test_size, random_state=args.random_state, shuffle=True)
+    train, val = train_test_split(
+        train, test_size=args.val_size, random_state=args.random_state, shuffle=True)
+
+    train.to_csv(osp.join(config.data_dir, 'interim',
+                          args.output_file_name + '_train.txt'), index=False, header=False)
+    val.to_csv(osp.join(config.data_dir, 'interim',
+                        args.output_file_name + 'val.txt'), index=False, header=False)
+    test.to_csv(osp.join(config.data_dir, 'interim',
+                         args.output_file_name + 'test.txt'), index=False, header=False)
